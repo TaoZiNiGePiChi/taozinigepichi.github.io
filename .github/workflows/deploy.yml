@@ -1,0 +1,41 @@
+name: Deploy React App to GitHub Pages
+
+on:
+  push:
+    branches: [ main ] # 当 main 分支有推送时触发
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    # 关键：设置权限，允许写入仓库（用于部署到gh-pages）
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout 🛎️
+      uses: actions/checkout@v4
+      
+    - name: Setup pnpm
+      # 使用官方 pnpm action 安装和设置 pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8 # 你可以指定版本，或者移除这行使用最新版
+        
+    - name: Setup Node.js 🔧
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: 'pnpm'
+        
+    - name: Install Dependencies 📦
+      run: pnpm install --frozen-lockfile
+
+    - name: Build 🔨
+      run: pnpm run build
+
+    - name: Deploy 🚀
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist # Create React App 的构建输出目录是 dist
